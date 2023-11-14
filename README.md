@@ -9,7 +9,4 @@ Implemented using an R-CNN trained on the ShanghaiTech crowd dataset.
 4. Calculate the rate of change in people/time to determine the estimated remaining waiting time.
 
 # Contributors
-Amy Li
-Nayel Benabdesadok
-Marc Bruni
-Sidney Gharib
+Amy Li, Nayel Benabdesadok, Marc Bruni, Sidney Gharib
