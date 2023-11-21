@@ -10,3 +10,7 @@ Implemented using an R-CNN trained on the ShanghaiTech crowd dataset.
 
 # Contributors
 Amy Li, Nayel Benabdesadok, Marc Bruni, Sidney Gharib
+
+# References
+This project builds off of the R-CNN model provided by Mehreen Tahir. 
+The source code can be found here: https://www.codeproject.com/Articles/5283660/AI-Queue-Length-Detection-Counting-the-Number-of-P
