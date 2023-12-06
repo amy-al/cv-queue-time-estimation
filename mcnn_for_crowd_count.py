@@ -9,9 +9,6 @@ Original file is located at
 
 ### This code was provided by Mehreen Tahir. The source code can be found here: https://www.codeproject.com/Articles/5283660/AI-Queue-Length-Detection-Counting-the-Number-of-P
 
-from google.colab import drive
-drive.mount('/content/drive')
-
 import os
 import cv2
 import csv
@@ -20,13 +17,17 @@ import random
 import numpy as np
 from scipy.io import loadmat
 from keras import backend as K
-import matplotlib.pyplot as plt
-from sklearn.utils import shuffle
+# import matplotlib.pyplot as plt
+# from sklearn.utils import shuffle
 from keras.models import load_model, Model
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Conv2D, MaxPooling2D, Concatenate, Input
+# from keras import models
 
-os.makedirs('/content/drive/My Drive/ShanghaiTech/part_B/test_data/ground-truth_csv/')
+### change it to your own directory ###
+shanghai_tech_path = "/Users/amyli/Documents/SNU/CV/project"
+
+os.makedirs(os.path.join(shanghai_tech_path,'ShanghaiTech/part_B/test_data/ground-truth_csv/'))
 
 """### Density Map Function"""
 
@@ -78,15 +79,13 @@ def get_density_map(image, points):
 
     return image_density
 
-"""### data Preprocess
-
-"""
+"""### data Preprocess"""
 
 # test data processing
 
-images_path = ''.join(['/content/drive/My Drive/ShanghaiTech/part_B/test_data/images/'])
-ground_truth_path = ''.join(['/content/drive/My Drive/ShanghaiTech/part_B/test_data/ground-truth/'])
-ground_truth_csv = ''.join(['/content/drive/My Drive/ShanghaiTech/part_B/test_data/ground-truth_csv/'])
+images_path = ''.join([shanghai_tech_path + '/ShanghaiTech/part_B/test_data/images/'])
+ground_truth_path = ''.join([shanghai_tech_path + '/ShanghaiTech/part_B/test_data/ground-truth/'])
+ground_truth_csv = ''.join([shanghai_tech_path + '/ShanghaiTech/part_B/test_data/ground-truth_csv/'])
 
 n = 316
 
@@ -101,19 +100,21 @@ for i in range(1, n+1):
         writer.writerows(image_density)
 print("Successfully processed files!")
 
-input_images_path = ''.join(['/content/drive/My Drive/ShanghaiTech/part_B/train_data/images/'])
-output_path = '/content/drive/My Drive/ShanghaiTech/processed_trainval/'
+input_images_path = ''.join([shanghai_tech_path + '/ShanghaiTech/part_B/train_data/images/'])
+output_path = shanghai_tech_path + '/ShanghaiTech/processed_trainval/'
 
 training_images_path = ''.join((output_path, '/training_images/'))
 training_densities_path = ''.join((output_path, '/training_densities/'))
 validation_images_path = ''.join((output_path, '/validation_images/'))
 validation_densities_path = ''.join((output_path, '/valalidation_densities/'))
 
-ground_truth_path = ''.join(['/content/drive/My Drive/ShanghaiTech/part_B/train_data/ground-truth/'])
+ground_truth_path = ''.join([shanghai_tech_path + '/ShanghaiTech/part_B/train_data/ground-truth/'])
 
 for i in [output_path, training_images_path, training_densities_path, validation_images_path, validation_densities_path]:
     if not os.path.exists(i):
         os.makedirs(i)
+
+# SKIP
 
 #train data processing
 
@@ -181,12 +182,12 @@ print("Successfully processed files!")
 
 """### Training the model"""
 
-training_images = '/content/drive/My Drive/ShanghaiTech/processed_trainval/training_images/'
-training_densities = '/content/drive/My Drive/ShanghaiTech/processed_trainval/training_densities/'
-validation_images = '/content/drive/My Drive/ShanghaiTech/processed_trainval/validation_images/'
-validation_densities = '/content/drive/My Drive/ShanghaiTech/processed_trainval/valalidation_densities/'
-test_images = '/content/drive/My Drive/ShanghaiTech/part_B/test_data/images/'
-test_densities = '/content/drive/My Drive/ShanghaiTech/part_B/test_data/ground-truth_csv/'
+training_images = shanghai_tech_path + '/ShanghaiTech/processed_trainval/training_images/'
+training_densities = shanghai_tech_path + '/ShanghaiTech/processed_trainval/training_densities/'
+validation_images = shanghai_tech_path + '/ShanghaiTech/processed_trainval/validation_images/'
+validation_densities = shanghai_tech_path + '/ShanghaiTech/processed_trainval/valalidation_densities/'
+test_images = shanghai_tech_path + '/ShanghaiTech/part_B/test_data/images/'
+test_densities = shanghai_tech_path + '/ShanghaiTech/part_B/test_data/ground-truth_csv/'
 
 train_paths = sorted([training_images + p for p in os.listdir(training_images)])
 train_labels = sorted([training_densities + p for p in os.listdir(training_densities)])
@@ -280,14 +281,17 @@ def Multi_Column_CNN(input_shape=None):
 
 # Commented out IPython magic to ensure Python compatibility.
 # Settings
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" # not sure if we need this
 # %matplotlib inline
 dataset = "B"
 
+# SKIP
 for i in ['train_paths', 'train_labels', 'validation_paths', 'validation_labels', 'test_paths', 'test_labels']:
     print('len({}) ='.format(i), len(eval(i)))
 
+# SKIP
 # read training data
+
 train_generator = x_y_generator(train_paths, train_labels, batch_size=len(train_paths))
 training_img, train_labels = train_generator.__next__()
 print('Training data is ready!')
@@ -302,16 +306,16 @@ test_generator = x_y_generator(test_paths, test_labels, batch_size=len(test_path
 testing_img, test_labels = test_generator.__next__()
 print('Test data reading is done.')
 
-direx = '/content/drive/My Drive/ShanghaiTech/weights'
+direx = shanghai_tech_path + '/ShanghaiTech/weights'
 if not os.path.exists(direx):
     os.mkdir(direx)
 
 best_validation = ModelCheckpoint(
-    filepath=os.path.join(direx, 'mcnn_val.hdf5'),
+    filepath=os.path.join(direx, 'mcnn_val_epoch_200.hdf5'), # renamed
     monitor='val_loss', verbose=1, save_best_only=True, mode='min'
 )
 best_training = ModelCheckpoint(
-    filepath=os.path.join(direx, 'mcnn_train.hdf5'),
+    filepath=os.path.join(direx, 'mcnn_train_epoch_200.hdf5'), # renamed
     monitor='loss', verbose=1, save_best_only=True, mode='min'
 )
 
@@ -321,47 +325,84 @@ model = Multi_Column_CNN(input_shape)
 model.compile(loss='mean_squared_error', optimizer='adam', metrics=[mean_absolute_error, mean_square_error])
 
 history = model.fit(
-    x=training_img, y=train_labels, batch_size=1, epochs=5,
+    x=training_img, y=train_labels, batch_size=1, epochs=200, # old = 5 epochs
     validation_data=(validating_img, validation_labels),
     callbacks=[best_validation, best_training]
 )
 
-model.save('/content/drive/My Drive/ShanghaiTech/')
+model.save(shanghai_tech_path + '/ShanghaiTech/model_epoch_200.keras')
 
 """### Testing the model
 
 """
 
-val_loss, loss = history.history['val_loss'], history.history['loss']
-loss = np.asarray(loss)
-plt.plot(loss, 'b')
-plt.legend(['loss'])
-plt.show()
-plt.plot(val_loss, 'r')
-plt.legend(['val_loss'])
-plt.show()
+# SKIP
 
-from keras import models
-model = models.load_model(os.path.join(direx, 'mcnn_val.hdf5'), custom_objects={'mean_absolute_error': mean_absolute_error, 'mean_square_error': mean_square_error})
-absolute_error = []
-square_error = []
-num_test = 20
-for i in range(testing_img.shape[0])[:num_test]:
-    inputs = np.reshape(testing_img[i], [1, *testing_img[i].shape[:2], 1])
-    outputs = np.squeeze(model.predict(inputs))
-    density_map = np.squeeze(test_labels[i])
-    count = np.sum(density_map)
-    prediction = np.sum(outputs)
-    fg, (ax0, ax1) = plt.subplots(1, 2, figsize=(16, 5))
-    plt.suptitle(' '.join([
-        'count:', str(round(count, 2)),
-        'prediction:', str(round(prediction, 2))
-    ]))
-    ax0.imshow(np.squeeze(inputs))
-    ax1.imshow(density_map * (255 / (np.max(density_map) - np.min(density_map))))
-    plt.show()
-    absolute_error.append(abs(count - prediction))
-    square_error.append((count - prediction) ** 2)
-mean_absolute_error = np.mean(absolute_error)
-mean_square_error = np.mean(square_error)
-print('mean_absolute_error:', mean_absolute_error, 'mean_square_error:', mean_square_error)
+# val_loss, loss = history.history['val_loss'], history.history['loss']
+# loss = np.asarray(loss)
+# plt.plot(loss, 'b')
+# plt.legend(['loss'])
+# plt.show()
+# plt.plot(val_loss, 'r')
+# plt.legend(['val_loss'])
+# plt.show()
+
+"""
+1. train on 200 epochs (maybe add early stopping)
+2. grab all of the predicted points (coords) per image and save to csv (each row is a new image)
+3. grab all ground truth points (coords) and create a csv (each row is corresponding image to predicted row)
+4. save one output image for marc with predictions, one col x one col y values
+5. integrate Nayel's code to process csv file --> run through ransac and get inliers for before and after images
+6. calculate difference in count + time or whatever
+
+"""
+
+"""
+with open('profiles1.csv', 'w', newline='') as file:
+    writer = csv.writer(file)
+    field = ["name", "age", "country"]
+
+    writer.writerow(field)
+    writer.writerow(["Oladele Damilola", "40", "Nigeria"])
+    writer.writerow(["Alina Hricko", "23", "Ukraine"])
+    writer.writerow(["Isabel Walter", "50", "United Kingdom"])
+"""
+
+## DONT NEED TO PREDICT JUST TRAIN ##
+
+# with open(shanghai_tech_path + '/ShanghaiTech/predictions/pred.csv', 'w', newline='') as file:
+#     writer = csv.writer(file)
+#     field = ["point coordinates"]
+#     writer.writerow(field)
+
+#     model = models.load_model(os.path.join(direx, 'mcnn_val_epoch_15.hdf5'), custom_objects={'mean_absolute_error': mean_absolute_error, 'mean_square_error': mean_square_error})
+#     absolute_error = []
+#     square_error = []
+#     num_test = 20
+#     for i in range(testing_img.shape[0])[:num_test]:
+#         inputs = np.reshape(testing_img[i], [1, *testing_img[i].shape[:2], 1])
+#         outputs = np.squeeze(model.predict(inputs))
+
+#         density_map = np.squeeze(test_labels[i])
+#         count_label = np.sum(density_map)
+#         count_prediction = np.sum(outputs)
+#         fg, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(16, 5))
+#         plt.suptitle(' '.join([
+#             'count_label:', str(round(count_label, 3)),
+#             'count_prediction:', str(round(count_prediction, 3))
+#         ]))
+#         ax0.imshow(np.squeeze(inputs), cmap='gray')
+#         ax1.imshow(density_map * (255 / (np.max(density_map) - np.min(density_map))), cmap='gray')
+#         ax2.imshow(outputs * (255 / (np.max(outputs) - np.min(outputs))), cmap='gray')
+#         print(outputs.shape) # is this the image shape? if so get the coord of point detections
+
+#         coords = np.argwhere(ax2>0) #?? double check
+#         writer.writerow([str(coord) for coord in coords])
+
+#         plt.show()
+#         mean_absolute_error.append(abs(count_label - count_prediction))
+#         mean_square_error.append((count_label - count_prediction) ** 2)
+
+#     mean_absolute_error = np.mean(absolute_error)
+#     mean_square_error = np.mean(square_error)
+#     print('mean_absolute_error:', mean_absolute_error, 'mean_square_error:', mean_square_error)
